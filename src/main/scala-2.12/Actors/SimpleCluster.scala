@@ -13,6 +13,8 @@ class SimpleCluster extends Actor with ActorLogging {
 
   var counter = 0
 
+  // Aquí deberíamos crear la sesión de Spark
+
   // subscribe to cluster changes, re-subscribe when restart
   override def preStart(): Unit = {
     cluster.subscribe(self, initialStateMode = InitialStateAsEvents,
@@ -24,6 +26,11 @@ class SimpleCluster extends Actor with ActorLogging {
     case MemberUp(member) => log.info("Member is Up: {}", member.address)
     case UnreachableMember(member) => log.info("Member detected as unreachable: {}", member)
     case MemberRemoved(member, previousStatus) => log.info("Member is Removed: {} after {}", member.address, previousStatus)
+
+    /**
+      * Hay que incluir el caso en que recibiendo cualquier tipo de String, entonces suponemos que es una sentencia SQL
+      * y la debemos ejecutar con el método .sql del SparkSession
+      */
     case "hello" => println("Hello " + counter)
                     counter+=1
                     sender ! "received"
